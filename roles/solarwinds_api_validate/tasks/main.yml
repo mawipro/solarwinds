@@ -1,11 +1,9 @@
 - name: Query SolarWinds IPAM for provisioned IP
   uri:
-    url: >
-      https://{{ solarwinds_api_host }}:{{ solarwinds_api_port }}
-      /SolarWinds/InformationService/v3/Json/Query
+    url: "https://{{ solarwinds_api_host }}:17774/SolarWinds/InformationService/v3/Json/Query"
     method: POST
-    user: "{{ solarwinds_api_user }}"
-    password: "{{ solarwinds_api_password }}"
+    user: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     force_basic_auth: true
     validate_certs: false
     body_format: json
@@ -16,7 +14,6 @@
         WHERE IPAddress = @ip
       parameters:
         ip: "{{ provisioned_ip }}"
-    return_content: true
   register: sw_api_result
 
 - name: Fail if IP not found in SolarWinds IPAM
@@ -29,6 +26,6 @@
 - name: Assert IP is in USED state in SolarWinds IPAM
   assert:
     that:
-      - sw_api_result.json.results[0].Status == 1
+      - sw_api_result.json.results[0].Status == 1 
     fail_msg: >
       IP {{ provisioned_ip }} exists in IPAM but is NOT in USED state

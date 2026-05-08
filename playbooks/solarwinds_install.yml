@@ -49,7 +49,7 @@
 # PLAY 5: Post-install validation
 ################################################################################
 - name: Validate SolarWinds agent
-  hosts: all
+  hosts: localhost
   gather_facts: false
   roles:
     - solarwinds_validate

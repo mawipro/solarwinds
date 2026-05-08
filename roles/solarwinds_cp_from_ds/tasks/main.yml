@@ -7,8 +7,6 @@
     datacenter: "{{ vcenter_datacenter }}"
     vm_name: "{{ provisioned_hostname }}"
     datastore: "{{ vcenter_datastore }}"
-    src: >
-      [{{ vcenter_datastore }}]
-      {{ solarwinds_datastore_path }}/{{ solarwinds_installer_name }}
+    src: "[{{ vcenter_datastore }}] {{ solarwinds_datastore_path }}/{{ solarwinds_installer_name }}"
     dest: "{{ solarwinds_installer_dest }}"
     operation: copy
