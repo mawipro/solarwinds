@@ -1,0 +1,29 @@
+- name: Check if SolarWinds agent already exists
+  stat:
+    path: "{{ solarwinds_install_dir }}/SolarWindsAgent/bin/swiagent"
+  register: sw_agent
+
+- name: Create install directory
+  file:
+    path: "{{ solarwinds_install_dir }}"
+    state: directory
+    mode: '0755'
+  when: not sw_agent.stat.exists
+
+- name: Extract SolarWinds agent
+  unarchive:
+    src: "{{ solarwinds_installer_dest }}"
+    dest: "{{ solarwinds_install_dir }}"
+    remote_src: true
+  when: not sw_agent.stat.exists
+
+- name: Install SolarWinds agent (Linux)
+  command: >
+    ./install.sh
+    --server {{ solarwinds_orion_server }}
+    --port {{ solarwinds_orion_port }}
+    --protocol {{ solarwinds_orion_protocol }}
+    --insecure
+  args:
+    chdir: "{{ solarwinds_install_dir }}/swigagent"
+  when: not sw_agent.stat.exists

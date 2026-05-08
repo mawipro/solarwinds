@@ -1,0 +1,55 @@
+---
+################################################################################
+# PLAY 1: Bootstrap dynamic inventory from provisioning output
+################################################################################
+- name: Bootstrap newly provisioned host
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Add provisioned VM to inventory
+      add_host:
+        name: "{{ provisioned_hostname }}"
+        ansible_host: "{{ provisioned_ip }}"
+        groups: "{{ provisioned_os }}"
+
+################################################################################
+# PLAY 2: Pre-flight checks
+################################################################################
+- name: Run pre-flight checks
+  hosts: all
+  gather_facts: false
+  roles:
+    - solarwinds_common
+
+################################################################################
+# PLAY 3: Copy binaries from vSphere datastore
+################################################################################
+- name: Copy SolarWinds binaries from datastore
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - solarwinds_copy_from_datastore
+
+################################################################################
+# PLAY 4: OS-specific installation
+################################################################################
+- name: Install SolarWinds on Windows
+  hosts: windows
+  gather_facts: false
+  roles:
+    - solarwinds_windows
+
+- name: Install SolarWinds on Linux
+  hosts: linux
+  gather_facts: false
+  roles:
+    - solarwinds_linux
+
+################################################################################
+# PLAY 5: Post-install validation
+################################################################################
+- name: Validate SolarWinds agent
+  hosts: all
+  gather_facts: false
+  roles:
+    - solarwinds_validate

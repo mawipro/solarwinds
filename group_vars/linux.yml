@@ -1,0 +1,3 @@
+solarwinds_installer_name: swigagent.tar.gz
+solarwinds_installer_dest: /tmp/swigagent.tar.gz
+solarwinds_install_dir: /opt/solarwinds

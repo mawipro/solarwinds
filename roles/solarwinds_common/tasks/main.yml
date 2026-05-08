@@ -1,0 +1,13 @@
+- name: Wait for Windows WinRM
+  wait_for:
+    host: "{{ ansible_host }}"
+    port: 5986
+    timeout: 600
+  when: "'windows' in group_names"
+
+- name: Wait for Linux SSH
+  wait_for:
+    host: "{{ ansible_host }}"
+    port: 22
+    timeout: 300
+  when: "'linux' in group_names"

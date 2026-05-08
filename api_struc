@@ -1,0 +1,51 @@
+> SWIS API -> Control / Query / API
+17774 = SolarWinds Information Service (SWIS) API
+This is the management and query API used for:
+
+IPAM queries 
+Node & interface metadata
+Status updates
+Automation & integrations
+REST / JSON queries (tested successfully)
+
+> Agent communication channel -> Telemetry / Agent data
+17778 = SolarWinds Agent → Orion communication
+Used for:
+
+Agent check‑ins
+Metrics upload
+Registration
+Heartbeat
+
+> IPAM status
+1 → Used
+2 → Available
+4 → Reserved
+8 → Transient
+
+
+> list one IP
+ curl -k -u baloise:Wipro@123 \
+  -X POST \
+  -H "Content-Type: application/json" \
+  https://172.17.66.121:17774/SolarWinds/InformationService/v3/Json/Query \
+  -d '{
+    "query": "SELECT IPAddress, Status, MAC FROM IPAM.IPNode WHERE SubnetID = @subnet AND IPAddress = @ip",
+    "parameters": {
+      "subnet": 115,
+      "ip": "172.17.77.16"
+    }
+  }'
+
+> list by status
+curl -k -u baloise:Wipro@123 \
+  -X POST \
+  -H "Content-Type: application/json" \
+  https://172.17.66.121:17774/SolarWinds/InformationService/v3/Json/Query \
+  -d '{
+    "query": "SELECT IPAddress, Status, MAC FROM IPAM.IPNode WHERE SubnetID = @subnet AND Status = 1",
+    "parameters": {
+      "subnet": 115
+    }
+  }'
+  

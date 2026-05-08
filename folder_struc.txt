@@ -1,0 +1,36 @@
+solarwinds-ansible/
+│
+├── playbooks/
+│   ├── solarwinds_install.yml         # Main orchestration playbook
+│
+├── roles/
+│   ├── solarwinds_common/
+│   │   ├── tasks/
+│   │   │   └── main.yml               # Pre-flight checks & host bootstrap
+│   │
+│   ├── solarwinds_copy_from_datastore/
+│   │   ├── tasks/
+│   │   │   └── main.yml               # vSphere → guest binary copy
+│   │
+│   ├── solarwinds_windows/
+│   │   ├── tasks/
+│   │   │   └── main.yml               # Windows install logic
+│   │
+│   ├── solarwinds_linux/
+│   │   ├── tasks/
+│   │   │   └── main.yml               # Linux install logic
+│   │
+│   ├── solarwinds_validate/
+│   │   ├── tasks/
+│   │   │   └── main.yml               # Post-install validation
+|   │
+│   ├── solarwinds_api_validate/
+│   │   ├── tasks/
+│   │   │   └── main.yml               # Post-install api validation
+|
+├── group_vars/
+│   ├── all.yml
+│   ├── windows.yml
+│   └── linux.yml
+│
+└── README.md                          # Optional but recommended

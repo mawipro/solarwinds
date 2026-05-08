@@ -1,0 +1,2 @@
+solarwinds_installer_name: SolarWinds-Agent.msi
+solarwinds_installer_dest: C:\Temp\SolarWinds-Agent.msi

@@ -1,0 +1,15 @@
+- name: Check if SolarWinds Agent is installed
+  win_service_info:
+    name: SolarWinds Agent
+  register: sw_agent
+
+- name: Install SolarWinds Agent (Windows)
+  win_package:
+    path: "{{ solarwinds_installer_dest }}"
+    arguments: >
+      /qn
+      SWI_SERVER={{ solarwinds_orion_server }}
+      SWI_SERVER_PORT={{ solarwinds_orion_port }}
+      SWI_PROTOCOL={{ solarwinds_orion_protocol }}
+      SWI_IGNORE_CERTIFICATE_ERRORS=1
+  when: not sw_agent.exists

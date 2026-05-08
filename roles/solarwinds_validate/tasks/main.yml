@@ -1,0 +1,12 @@
+- name: Validate SolarWinds service on Windows
+  win_service:
+    name: SolarWinds Agent
+    state: started
+  when: "'windows' in group_names"
+
+- name: Validate SolarWinds service on Linux
+  systemd:
+    name: solarwinds-agent
+    state: started
+    enabled: yes
+  when: "'linux' in group_names"
