@@ -35,44 +35,41 @@
 
 
 ################################################################################
-# TEST PLAY: Print Credentials and Variables
+# TEST PLAY: Print Credentials from AAP
 ################################################################################
-- name: Test - Print all variables and credentials
+- name: Test - Print AAP Credentials
   hosts: localhost
   gather_facts: false
   tasks:
 
-    - name: Print vCenter VMware Credentials
+    - name: Print VMware vCenter Credentials (from vcenter_vmware_cred machine credential)
       debug:
         msg:
-          - "=== vCenter VMware Credentials ==="
-          - "vcenter_vmware_cred: {{ vcenter_vmware_cred | default('NOT SET') }}"
-      when: vcenter_vmware_cred is defined
+          - "=== VMware vCenter Credential ==="
+          - "Username: {{ ansible_user | default('NOT FOUND') }}"
+          - "Host/vCenter: {{ ansible_host | default('NOT FOUND') }}"
+          - "Password: {{ '***MASKED***' if ansible_password else 'NOT SET' }}"
+          - "Port: {{ ansible_port | default('443') }}"
+      when: vcenter_vmware_cred is defined or ansible_user is defined
 
-    - name: Print SolarWinds Credentials
+    - name: Print SolarWinds Machine Credentials (from solarwinds_cred machine credential)
       debug:
         msg:
-          - "=== SolarWinds Credentials ==="
-          - "solarwinds_cred: {{ solarwinds_cred | default('NOT SET') }}"
-      when: solarwinds_cred is defined
+          - "=== SolarWinds Machine Credential ==="
+          - "Username: {{ solarwinds_username | default(ansible_user | default('NOT FOUND')) }}"
+          - "Password: {{ '***MASKED***' if solarwinds_password or ansible_password else 'NOT SET' }}"
+      when: solarwinds_cred is defined or solarwinds_username is defined
 
-    - name: Print all variables (to debug)
+    - name: Print all available credential-related variables
+      debug:
+        msg: "{{ vars | dict2items | selectattr('key', 'match', '(ansible_|cred|password|username|host)') | map(attribute='key') | list }}"
+
+    - name: Print provisioning variables
       debug:
         msg:
-          - "=== All Available Variables ==="
-          - "{{ vars | dict2items | map(attribute='key') | list }}"
-
-    - name: Print ansible_user if defined
-      debug:
-        msg: "ansible_user: {{ ansible_user }}"
-      when: ansible_user is defined
-
-    - name: Print provisioned hostname details
-      debug:
-        msg:
-          - "provisioned_hostname: {{ provisioned_hostname | default('NOT SET') }}"
-          - "provisioned_ip: {{ provisioned_ip | default('NOT SET') }}"
-          - "provisioned_os: {{ provisioned_os | default('NOT SET') }}"
+          - "provisioned_hostname: {{ provisioned_hostname }}"
+          - "provisioned_ip: {{ provisioned_ip }}"
+          - "provisioned_os: {{ provisioned_os }}"
 
 
 ################################################################################
