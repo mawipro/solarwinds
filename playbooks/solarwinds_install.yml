@@ -69,27 +69,27 @@
 #         msg: "{{ vars | dict2items | selectattr('key', 'search', 'solarwinds|sw_') | list }}"
 
 
-###############################################################################
-PLAY 2: Pre-flight checks (COMMENTED OUT)
-###############################################################################
+# ###############################################################################
+# PLAY 2: Pre-flight checks (COMMENTED OUT)
+# ###############################################################################
 - name: Run pre-flight checks
   hosts: localhost
   gather_facts: false
   roles:
     - solarwinds_common
 
-###############################################################################
-PLAY 3: Copy binaries from vSphere datastore (COMMENTED OUT)
-###############################################################################
+# ###############################################################################
+# PLAY 3: Copy binaries from vSphere datastore (COMMENTED OUT)
+# ###############################################################################
 - name: Copy SolarWinds binaries from datastore
   hosts: localhost
   gather_facts: false
   roles:
     - solarwinds_cp_from_ds
 
-###############################################################################
-PLAY 4: OS-specific installation (COMMENTED OUT)
-###############################################################################
+# ###############################################################################
+# PLAY 4: OS-specific installation (COMMENTED OUT)
+# ###############################################################################
 - name: Install SolarWinds on Windows
   hosts: windows
   gather_facts: false
@@ -102,9 +102,9 @@ PLAY 4: OS-specific installation (COMMENTED OUT)
   roles:
     - solarwinds_linux
 
-###############################################################################
-PLAY 5: Post-install validation (COMMENTED OUT)
-###############################################################################
+# ###############################################################################
+# PLAY 5: Post-install validation (COMMENTED OUT)
+# ###############################################################################
 - name: Validate SolarWinds agent
   hosts: localhost
   gather_facts: false
