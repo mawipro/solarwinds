@@ -35,9 +35,9 @@
 
 
 ################################################################################
-# TEST PLAY: Print Credentials
+# TEST PLAY: Print Credentials and Variables
 ################################################################################
-- name: Test - Print vCenter and SolarWinds Credentials
+- name: Test - Print all variables and credentials
   hosts: localhost
   gather_facts: false
   tasks:
@@ -47,23 +47,32 @@
         msg:
           - "=== vCenter VMware Credentials ==="
           - "vcenter_vmware_cred: {{ vcenter_vmware_cred | default('NOT SET') }}"
-          - "Type: {{ vcenter_vmware_cred.get('type', 'unknown') | default('N/A') }}"
-          - "Username: {{ vcenter_vmware_cred.get('username', 'NOT FOUND') | default('N/A') }}"
-          - "Password: {{ '*' * 10 if vcenter_vmware_cred.get('password') else 'NOT FOUND' }}"
-          - ""
+      when: vcenter_vmware_cred is defined
 
     - name: Print SolarWinds Credentials
       debug:
         msg:
           - "=== SolarWinds Credentials ==="
           - "solarwinds_cred: {{ solarwinds_cred | default('NOT SET') }}"
-          - "Type: {{ solarwinds_cred.get('type', 'unknown') | default('N/A') }}"
-          - "Username: {{ solarwinds_cred.get('username', 'NOT FOUND') | default('N/A') }}"
-          - "Password: {{ '*' * 10 if solarwinds_cred.get('password') else 'NOT FOUND' }}"
+      when: solarwinds_cred is defined
 
-    - name: Print all available variables starting with 'ansible_' or 'cred'
+    - name: Print all variables (to debug)
       debug:
-        msg: "{{ vars | dict2items | selectattr('key', 'match', '(ansible_|cred)') | list }}"
+        msg:
+          - "=== All Available Variables ==="
+          - "{{ vars | dict2items | map(attribute='key') | list }}"
+
+    - name: Print ansible_user if defined
+      debug:
+        msg: "ansible_user: {{ ansible_user }}"
+      when: ansible_user is defined
+
+    - name: Print provisioned hostname details
+      debug:
+        msg:
+          - "provisioned_hostname: {{ provisioned_hostname | default('NOT SET') }}"
+          - "provisioned_ip: {{ provisioned_ip | default('NOT SET') }}"
+          - "provisioned_os: {{ provisioned_os | default('NOT SET') }}"
 
 
 ################################################################################
