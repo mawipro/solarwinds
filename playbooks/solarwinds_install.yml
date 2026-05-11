@@ -42,7 +42,7 @@
   gather_facts: false
   tasks:
 
-    - name: Print VMware vCenter Credentials (from vcenter_vmware_cred machine credential)
+    - name: Print VMware vCenter Credentials
       debug:
         msg:
           - "=== VMware vCenter Credential ==="
@@ -50,19 +50,12 @@
           - "Host/vCenter: {{ ansible_host | default('NOT FOUND') }}"
           - "Password: {{ '***MASKED***' if ansible_password else 'NOT SET' }}"
           - "Port: {{ ansible_port | default('443') }}"
-      when: vcenter_vmware_cred is defined or ansible_user is defined
 
-    - name: Print SolarWinds Machine Credentials (from solarwinds_cred machine credential)
+    - name: Print all available variables (to find SolarWinds cred)
       debug:
         msg:
-          - "=== SolarWinds Machine Credential ==="
-          - "Username: {{ solarwinds_username | default(ansible_user | default('NOT FOUND')) }}"
-          - "Password: {{ '***MASKED***' if solarwinds_password or ansible_password else 'NOT SET' }}"
-      when: solarwinds_cred is defined or solarwinds_username is defined
-
-    - name: Print all available credential-related variables
-      debug:
-        msg: "{{ vars | dict2items | selectattr('key', 'match', '(ansible_|cred|password|username|host)') | map(attribute='key') | list }}"
+          - "=== ALL VARIABLES ==="
+          - "{{ vars | dict2items | map(attribute='key') | list }}"
 
     - name: Print provisioning variables
       debug:
@@ -70,6 +63,10 @@
           - "provisioned_hostname: {{ provisioned_hostname }}"
           - "provisioned_ip: {{ provisioned_ip }}"
           - "provisioned_os: {{ provisioned_os }}"
+
+    - name: Check for any solarwinds-related variables
+      debug:
+        msg: "{{ vars | dict2items | selectattr('key', 'search', 'solarwinds|sw_') | list }}"
 
 
 ################################################################################
