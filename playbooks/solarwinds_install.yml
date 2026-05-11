@@ -38,7 +38,7 @@
 # PLAY 2: Pre-flight checks
 ################################################################################
 - name: Run pre-flight checks
-  hosts: all
+  hosts: windows
   gather_facts: false
   roles:
     - solarwinds_common
