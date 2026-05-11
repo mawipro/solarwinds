@@ -35,43 +35,75 @@
 
 
 ################################################################################
-# PLAY 2: Pre-flight checks
+# TEST PLAY: Print Credentials
 ################################################################################
-- name: Run pre-flight checks
+- name: Test - Print vCenter and SolarWinds Credentials
   hosts: localhost
   gather_facts: false
-  roles:
-    - solarwinds_common
+  tasks:
+
+    - name: Print vCenter VMware Credentials
+      debug:
+        msg:
+          - "=== vCenter VMware Credentials ==="
+          - "vcenter_vmware_cred: {{ vcenter_vmware_cred | default('NOT SET') }}"
+          - "Type: {{ vcenter_vmware_cred.get('type', 'unknown') | default('N/A') }}"
+          - "Username: {{ vcenter_vmware_cred.get('username', 'NOT FOUND') | default('N/A') }}"
+          - "Password: {{ '*' * 10 if vcenter_vmware_cred.get('password') else 'NOT FOUND' }}"
+          - ""
+
+    - name: Print SolarWinds Credentials
+      debug:
+        msg:
+          - "=== SolarWinds Credentials ==="
+          - "solarwinds_cred: {{ solarwinds_cred | default('NOT SET') }}"
+          - "Type: {{ solarwinds_cred.get('type', 'unknown') | default('N/A') }}"
+          - "Username: {{ solarwinds_cred.get('username', 'NOT FOUND') | default('N/A') }}"
+          - "Password: {{ '*' * 10 if solarwinds_cred.get('password') else 'NOT FOUND' }}"
+
+    - name: Print all available variables starting with 'ansible_' or 'cred'
+      debug:
+        msg: "{{ vars | dict2items | selectattr('key', 'match', '(ansible_|cred)') | list }}"
+
 
 ################################################################################
-# PLAY 3: Copy binaries from vSphere datastore
+# PLAY 2: Pre-flight checks (COMMENTED OUT)
 ################################################################################
-- name: Copy SolarWinds binaries from datastore
-  hosts: localhost
-  gather_facts: false
-  roles:
-    - solarwinds_cp_from_ds
+# - name: Run pre-flight checks
+#   hosts: localhost
+#   gather_facts: false
+#   roles:
+#     - solarwinds_common
 
 ################################################################################
-# PLAY 4: OS-specific installation
+# PLAY 3: Copy binaries from vSphere datastore (COMMENTED OUT)
 ################################################################################
-- name: Install SolarWinds on Windows
-  hosts: windows
-  gather_facts: false
-  roles:
-    - solarwinds_windows
-
-- name: Install SolarWinds on Linux
-  hosts: linux
-  gather_facts: false
-  roles:
-    - solarwinds_linux
+# - name: Copy SolarWinds binaries from datastore
+#   hosts: localhost
+#   gather_facts: false
+#   roles:
+#     - solarwinds_cp_from_ds
 
 ################################################################################
-# PLAY 5: Post-install validation
+# PLAY 4: OS-specific installation (COMMENTED OUT)
 ################################################################################
-- name: Validate SolarWinds agent
-  hosts: localhost
-  gather_facts: false
-  roles:
-    - solarwinds_validate
+# - name: Install SolarWinds on Windows
+#   hosts: windows
+#   gather_facts: false
+#   roles:
+#     - solarwinds_windows
+
+# - name: Install SolarWinds on Linux
+#   hosts: linux
+#   gather_facts: false
+#   roles:
+#     - solarwinds_linux
+
+################################################################################
+# PLAY 5: Post-install validation (COMMENTED OUT)
+################################################################################
+# - name: Validate SolarWinds agent
+#   hosts: localhost
+#   gather_facts: false
+#   roles:
+#     - solarwinds_validate
