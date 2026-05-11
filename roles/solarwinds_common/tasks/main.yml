@@ -1,15 +1,24 @@
 - name: Wait for Windows WinRM
-  wait_for:
-    host: "{{ ansible_host }}"
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[provisioned_hostname].ansible_host }}"
     port: 5986
     timeout: 600
-  delegate_to: localhost
-  when: "'windows' in group_names"
+  connection: local
 
-- name: Wait for Linux SSH
-  wait_for:
-    host: "{{ ansible_host }}"
-    port: 22
-    timeout: 300
-  delegate_to: localhost
-  when: "'linux' in group_names"
+
+# - name: Wait for Windows WinRM
+#   wait_for:
+#     host: "{{ ansible_host }}"
+#     port: 5986
+#     timeout: 600
+#   delegate_to: localhost
+#   connection: local
+#   when: "'windows' in group_names"
+
+# - name: Wait for Linux SSH
+#   wait_for:
+#     host: "{{ ansible_host }}"
+#     port: 22
+#     timeout: 300
+#   delegate_to: localhost
+#   when: "'linux' in group_names"
