@@ -28,7 +28,7 @@
   hosts: localhost
   gather_facts: false
   roles:
-    - solarwinds_copy_from_ds
+    - solarwinds_cp_from_ds
 
 ################################################################################
 # PLAY 4: OS-specific installation
