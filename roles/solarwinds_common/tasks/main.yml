@@ -3,6 +3,7 @@
     host: "{{ ansible_host }}"
     port: 5986
     timeout: 600
+  delegate_to: localhost
   when: "'windows' in group_names"
 
 - name: Wait for Linux SSH
@@ -10,4 +11,5 @@
     host: "{{ ansible_host }}"
     port: 22
     timeout: 300
+  delegate_to: localhost
   when: "'linux' in group_names"
