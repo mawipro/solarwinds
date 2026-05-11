@@ -1,5 +1,5 @@
 - name: Validate SolarWinds service on Windows
-  win_service:
+  ansible.windows.win_service:
     name: SolarWinds Agent
     state: started
   when: "'windows' in group_names"

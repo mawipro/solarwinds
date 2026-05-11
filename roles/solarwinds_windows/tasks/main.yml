@@ -1,10 +1,10 @@
 - name: Check if SolarWinds Agent is installed
-  win_service_info:
+  ansible.windows.win_service_info:
     name: SolarWinds Agent
   register: sw_agent
 
 - name: Install SolarWinds Agent (Windows)
-  win_package:
+  ansible.windows.win_package:
     path: "{{ solarwinds_installer_dest }}"
     arguments: >
       /qn
