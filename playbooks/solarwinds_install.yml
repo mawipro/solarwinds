@@ -6,11 +6,33 @@
   hosts: localhost
   gather_facts: false
   tasks:
+
+    - name: Fail if provisioned OS is unsupported
+      assert:
+        that:
+          - provisioned_os is defined
+          - provisioned_os | lower in ['windows', 'win', 'windows_server', 'linux']
+        fail_msg: >
+          Unsupported or missing provisioned_os '{{ provisioned_os }}'.
+          Expected one of: windows, win, windows_server, linux.
+
     - name: Add provisioned VM to inventory
       add_host:
         name: "{{ provisioned_hostname }}"
         ansible_host: "{{ provisioned_ip }}"
-        groups: "{{ provisioned_os }}"
+        groups: >-
+          {{
+            'windows' if provisioned_os | lower in ['windows', 'win', 'windows_server']
+            else 'linux'
+          }}
+
+    - name: Show dynamic inventory classification
+      debug:
+        msg:
+          - "Host: {{ provisioned_hostname }}"
+          - "ansible_host: {{ hostvars[provisioned_hostname].ansible_host }}"
+          - "Groups: {{ hostvars[provisioned_hostname].group_names }}"
+
 
 ################################################################################
 # PLAY 2: Pre-flight checks
