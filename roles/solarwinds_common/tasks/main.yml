@@ -3,6 +3,7 @@
     host: "{{ hostvars[provisioned_hostname].ansible_host }}"
     port: 5986
     timeout: 600
+  delegate_to: localhost
   connection: local
 
 
