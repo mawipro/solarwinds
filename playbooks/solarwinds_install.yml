@@ -27,7 +27,7 @@
     # 1. Wait for connection (Replaces the failing solarwinds_common role)
     - name: Ensure VM is reachable and ready
       ansible.builtin.wait_for_connection:
-        timeout: 600
+        timeout: 5
 
     # 2. Automatically discover OS facts
     - name: Gather facts
