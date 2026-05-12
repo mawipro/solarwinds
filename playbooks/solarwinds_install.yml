@@ -1,21 +1,11 @@
 ---
 ################################################################################
-# PLAY 1: Bootstrap dynamic inventory from provisioning output
+# PLAY 1: Bootstrap (Required for dynamic inventory from Cloud Studio)
 ################################################################################
 - name: Bootstrap newly provisioned host
   hosts: localhost
   gather_facts: false
   tasks:
-
-    - name: Fail if provisioned OS is unsupported
-      assert:
-        that:
-          - provisioned_os is defined
-          - provisioned_os | lower in ['windows', 'win', 'windows_server', 'linux']
-        fail_msg: >
-          Unsupported or missing provisioned_os '{{ provisioned_os }}'.
-          Expected one of: windows, win, windows_server, linux.
-
     - name: Add provisioned VM to inventory
       add_host:
         name: "{{ provisioned_hostname }}"
@@ -26,87 +16,149 @@
             else 'linux'
           }}
 
-    - name: Show dynamic inventory classification
-      debug:
-        msg:
-          - "Host: {{ provisioned_hostname }}"
-          - "ansible_host: {{ hostvars[provisioned_hostname].ansible_host }}"
-          - "Groups: {{ hostvars[provisioned_hostname].group_names }}"
+################################################################################
+# PLAY 2: Direct Installation (The Simplified Path)
+################################################################################
+- name: SolarWinds Agent Installation
+  hosts: all
+  gather_facts: false
+  
+  tasks:
+    # 1. Wait for connection (Replaces the failing solarwinds_common role)
+    - name: Ensure VM is reachable and ready
+      ansible.builtin.wait_for_connection:
+        timeout: 600
+
+    # 2. Automatically discover OS facts
+    - name: Gather facts
+      ansible.builtin.setup:
+
+    # 3. Run OS-specific installation roles
+    - name: Run Windows Installation
+      include_role:
+        name: solarwinds_windows
+      when: ansible_os_family == "Windows"
+
+    - name: Run Linux Installation
+      include_role:
+        name: solarwinds_linux
+      when: ansible_os_family != "Windows"
+
+    # 4. Final Validation
+    - name: Verify SolarWinds Agent
+      include_role:
+        name: solarwinds_validate
 
 
-################################################################################
-# TEST PLAY: Print Credentials from AAP
-################################################################################
-# - name: Test - Print AAP Credentials
+# ---
+# ################################################################################
+# # PLAY 1: Bootstrap dynamic inventory from provisioning output
+# ################################################################################
+# - name: Bootstrap newly provisioned host
 #   hosts: localhost
 #   gather_facts: false
 #   tasks:
 
-#     - name: Print VMware vCenter Credentials
+#     - name: Fail if provisioned OS is unsupported
+#       assert:
+#         that:
+#           - provisioned_os is defined
+#           - provisioned_os | lower in ['windows', 'win', 'windows_server', 'linux']
+#         fail_msg: >
+#           Unsupported or missing provisioned_os '{{ provisioned_os }}'.
+#           Expected one of: windows, win, windows_server, linux.
+
+#     - name: Add provisioned VM to inventory
+#       add_host:
+#         name: "{{ provisioned_hostname }}"
+#         ansible_host: "{{ provisioned_ip }}"
+#         groups: >-
+#           {{
+#             'windows' if provisioned_os | lower in ['windows', 'win', 'windows_server']
+#             else 'linux'
+#           }}
+
+#     - name: Show dynamic inventory classification
 #       debug:
 #         msg:
-#           - "=== VMware vCenter Credential ==="
-#           - "Username: {{ ansible_user | default('NOT FOUND') }}"
-#           - "Host/vCenter: {{ ansible_host | default('NOT FOUND') }}"
-#           - "Password: {{ '***MASKED***' if ansible_password else 'NOT SET' }}"
-#           - "Port: {{ ansible_port | default('443') }}"
-
-#     - name: Print all available variables (to find SolarWinds cred)
-#       debug:
-#         msg:
-#           - "=== ALL VARIABLES ==="
-#           - "{{ vars | dict2items | map(attribute='key') | list }}"
-
-#     - name: Print provisioning variables
-#       debug:
-#         msg:
-#           - "provisioned_hostname: {{ provisioned_hostname }}"
-#           - "provisioned_ip: {{ provisioned_ip }}"
-#           - "provisioned_os: {{ provisioned_os }}"
-
-#     - name: Check for any solarwinds-related variables
-#       debug:
-#         msg: "{{ vars | dict2items | selectattr('key', 'search', 'solarwinds|sw_') | list }}"
+#           - "Host: {{ provisioned_hostname }}"
+#           - "ansible_host: {{ hostvars[provisioned_hostname].ansible_host }}"
+#           - "Groups: {{ hostvars[provisioned_hostname].group_names }}"
 
 
-# ###############################################################################
-# PLAY 2: Pre-flight checks (COMMENTED OUT)
-# ###############################################################################
-- name: Run pre-flight checks
-  hosts: localhost
-  gather_facts: false
-  roles:
-    - solarwinds_common
+# ################################################################################
+# # TEST PLAY: Print Credentials from AAP
+# ################################################################################
+# # - name: Test - Print AAP Credentials
+# #   hosts: localhost
+# #   gather_facts: false
+# #   tasks:
 
-# ###############################################################################
-# PLAY 3: Copy binaries from vSphere datastore (COMMENTED OUT)
-# ###############################################################################
-- name: Copy SolarWinds binaries from datastore
-  hosts: localhost
-  gather_facts: false
-  roles:
-    - solarwinds_cp_from_ds
+# #     - name: Print VMware vCenter Credentials
+# #       debug:
+# #         msg:
+# #           - "=== VMware vCenter Credential ==="
+# #           - "Username: {{ ansible_user | default('NOT FOUND') }}"
+# #           - "Host/vCenter: {{ ansible_host | default('NOT FOUND') }}"
+# #           - "Password: {{ '***MASKED***' if ansible_password else 'NOT SET' }}"
+# #           - "Port: {{ ansible_port | default('443') }}"
 
-# ###############################################################################
-# PLAY 4: OS-specific installation (COMMENTED OUT)
-# ###############################################################################
-- name: Install SolarWinds on Windows
-  hosts: windows
-  gather_facts: false
-  roles:
-    - solarwinds_windows
+# #     - name: Print all available variables (to find SolarWinds cred)
+# #       debug:
+# #         msg:
+# #           - "=== ALL VARIABLES ==="
+# #           - "{{ vars | dict2items | map(attribute='key') | list }}"
 
-- name: Install SolarWinds on Linux
-  hosts: linux
-  gather_facts: false
-  roles:
-    - solarwinds_linux
+# #     - name: Print provisioning variables
+# #       debug:
+# #         msg:
+# #           - "provisioned_hostname: {{ provisioned_hostname }}"
+# #           - "provisioned_ip: {{ provisioned_ip }}"
+# #           - "provisioned_os: {{ provisioned_os }}"
 
-# ###############################################################################
-# PLAY 5: Post-install validation (COMMENTED OUT)
-# ###############################################################################
-- name: Validate SolarWinds agent
-  hosts: localhost
-  gather_facts: false
-  roles:
-    - solarwinds_validate
+# #     - name: Check for any solarwinds-related variables
+# #       debug:
+# #         msg: "{{ vars | dict2items | selectattr('key', 'search', 'solarwinds|sw_') | list }}"
+
+
+# # ###############################################################################
+# # PLAY 2: Pre-flight checks (COMMENTED OUT)
+# # ###############################################################################
+# - name: Run pre-flight checks
+#   hosts: localhost
+#   gather_facts: false
+#   roles:
+#     - solarwinds_common
+
+# # ###############################################################################
+# # PLAY 3: Copy binaries from vSphere datastore (COMMENTED OUT)
+# # ###############################################################################
+# - name: Copy SolarWinds binaries from datastore
+#   hosts: localhost
+#   gather_facts: false
+#   roles:
+#     - solarwinds_cp_from_ds
+
+# # ###############################################################################
+# # PLAY 4: OS-specific installation (COMMENTED OUT)
+# # ###############################################################################
+# - name: Install SolarWinds on Windows
+#   hosts: windows
+#   gather_facts: false
+#   roles:
+#     - solarwinds_windows
+
+# - name: Install SolarWinds on Linux
+#   hosts: linux
+#   gather_facts: false
+#   roles:
+#     - solarwinds_linux
+
+# # ###############################################################################
+# # PLAY 5: Post-install validation (COMMENTED OUT)
+# # ###############################################################################
+# - name: Validate SolarWinds agent
+#   hosts: localhost
+#   gather_facts: false
+#   roles:
+#     - solarwinds_validate
